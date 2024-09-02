@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: espocrm
+  annotations:
+    cert-manager.io/cluster-issuer: {{ .config.clusterIssuer }}
+    package-operator.run/phase: deploy
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+      - {{ .config.hostname }}
+      secretName: auth-tls-secret
+  rules:
+  - host: "{{ .config.hostname }}"
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: espocrm
+            port:
+              number: 80

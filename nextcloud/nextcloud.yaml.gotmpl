@@ -1,0 +1,113 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nextcloud-headless
+  labels:
+    app: nextcloud
+  annotations:
+    package-operator.run/phase: deploy
+spec:
+  ports:
+  - name: https
+    port: 443
+    targetPort: 8443
+  selector:
+    app: nextcloud
+  type: ClusterIP
+  clusterIP: None
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: nextcloud
+  labels:
+    app: nextcloud
+  annotations:
+    package-operator.run/phase: deploy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nextcloud
+  serviceName: nextcloud-headless
+  template:
+    metadata:
+      labels:
+        app: nextcloud
+    spec:
+      containers:
+      - name: nextcloud
+        image: docker.io/nextcloud:29.0.4-apache
+        volumeMounts:
+        - mountPath: /var/www/html
+          name: webroot
+        - mountPath: /var/www/html/data
+          name: data
+        env:
+        - name: REDIS_HOST
+          value: localhost
+        - name: POSTGRES_HOST
+          value: localhost
+        - name: POSTGRES_DB
+          value: nextcloud
+        - name: POSTGRES_USER
+          value: nextcloud
+        - name: POSTGRES_PASSWORD
+          value: nextcloud
+        ports:
+        - name: http
+          containerPort: 80
+      - command:
+        - /cron.sh
+        env:
+        - name: REDIS_HOST
+          value: localhost
+        - name: POSTGRES_HOST
+          value: localhost
+        - name: POSTGRES_DB
+          value: nextcloud
+        - name: POSTGRES_USER
+          value: nextcloud
+        - name: POSTGRES_PASSWORD
+          value: nextcloud
+        image: docker.io/nextcloud:29.0.4-apache
+        name: cron
+        volumeMounts:
+        - mountPath: /var/www/html
+          name: webroot
+        - mountPath: /var/www/html/data
+          name: data
+      - name: postgres
+        image: postgres:14
+        env:
+        - name: POSTGRES_USER
+          value: nextcloud
+        - name: POSTGRES_PASSWORD
+          value: nextcloud
+        - name: POSTGRES_DB
+          value: nextcloud
+        volumeMounts:
+        - name: postgres-data
+          mountPath: /var/lib/postgresql/data
+          subPath: postgres
+      - name: redis
+        args:
+        - redis-server
+        - --save ''
+        - --appendonly no
+        - --maxmemory 483183820800
+        - --maxmemory-policy allkeys-lfu
+        image: redis:7.2-alpine
+      volumes:
+      - hostPath:
+          path: /mnt/k8s/apps/nextcloud-data
+          type: Directory
+        name: data
+      - hostPath:
+          path: /mnt/k8s/apps/nextcloud-webroot
+          type: Directory
+        name: webroot
+      - hostPath:
+          path: /mnt/k8s/apps/postgres-nextcloud
+          type: Directory
+        name: postgres-data

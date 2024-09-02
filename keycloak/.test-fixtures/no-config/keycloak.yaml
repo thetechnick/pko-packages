@@ -1,0 +1,97 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak-headless
+  labels:
+    app: keycloak
+  annotations:
+    package-operator.run/phase: deploy
+spec:
+  ports:
+  - name: https
+    port: 443
+    targetPort: 8443
+  selector:
+    app: keycloak
+  type: ClusterIP
+  clusterIP: None
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: keycloak
+  labels:
+    app: keycloak
+  annotations:
+    package-operator.run/phase: deploy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keycloak
+  serviceName: keycloak-headless
+  template:
+    metadata:
+      labels:
+        app: keycloak
+    spec:
+      containers:
+      - name: keycloak
+        image: quay.io/keycloak/keycloak:25.0.2
+        args: ["start"]
+        volumeMounts:
+        - name: certs
+          mountPath: "/etc/certs"
+          readOnly: true
+        env:
+        - name: KEYCLOAK_ADMIN
+          value: "admin"
+        - name: KEYCLOAK_ADMIN_PASSWORD
+          value: "admin"
+        - name: KC_PROXY
+          value: "edge"
+        - name: KC_HOSTNAME
+          value: sso.thetechnick.ninja
+        - name: KC_DB
+          value: postgres
+        - name: KC_DB_URL
+          value: "jdbc:postgresql://localhost/keycloak"
+        - name: KC_DB_USERNAME
+          value: "keycloak"
+        - name: KC_DB_PASSWORD
+          value: "keycloak"
+        - name: KC_HTTPS_CERTIFICATE_FILE
+          value: "/etc/certs/tls.crt"
+        - name: KC_HTTPS_CERTIFICATE_KEY_FILE
+          value: "/etc/certs/tls.key"
+        ports:
+        - name: https
+          containerPort: 8443
+        readinessProbe:
+          httpGet:
+            scheme: HTTPS
+            path: /realms/master
+            port: 8443
+          initialDelaySeconds: 20
+          periodSeconds: 5
+      - name: postgres
+        image: postgres:14
+        env:
+        - name: POSTGRES_USER
+          value: keycloak
+        - name: POSTGRES_PASSWORD
+          value: keycloak
+        - name: POSTGRES_DB
+          value: keycloak
+        volumeMounts:
+        - name: postgres-data
+          mountPath: /var/lib/postgresql/data
+          subPath: postgres
+      volumes:
+      - name: certs
+        secret:
+          secretName: auth-tls-secret
+      - hostPath:
+          path: /mnt/k8s/apps/postgres-keycloak
+          type: Directory
+        name: postgres-data

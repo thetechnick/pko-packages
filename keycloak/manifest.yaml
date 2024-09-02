@@ -1,0 +1,48 @@
+apiVersion: manifests.package-operator.run/v1alpha1
+kind: PackageManifest
+metadata:
+  creationTimestamp: null
+  name: keycloak
+spec:
+  phases:
+  - name: deploy
+  availabilityProbes:
+  - probes:
+    - fieldsEqual:
+        fieldA: .status.updatedReplicas
+        fieldB: .status.replicas
+    - fieldsEqual:
+        fieldA: .status.availableReplicas
+        fieldB: .status.replicas
+    selector:
+      kind:
+        group: apps
+        kind: StatefulSet
+  config:
+    openAPIV3Schema:
+      properties:
+        hostname:
+          type: string
+        clusterIssuer:
+          type: string
+      required:
+      - hostname
+      - clusterIssuer
+      type: object
+  filter: {}
+  images: null
+  scopes:
+  - Namespaced
+test:
+  kubeconform:
+    kubernetesVersion: v1.30.2
+  template:
+  - context:
+      package:
+        image: registry.package-operator.run/static-image
+        metadata:
+          name: keycloak
+      config:
+        hostname: sso.thetechnick.ninja
+        clusterIssuer: le-prod
+    name: no-config

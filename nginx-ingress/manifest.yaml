@@ -1,0 +1,38 @@
+apiVersion: manifests.package-operator.run/v1alpha1
+kind: PackageManifest
+metadata:
+  creationTimestamp: null
+  name: nginx-ingress
+spec:
+  availabilityProbes:
+  - probes:
+    - condition:
+        status: "True"
+        type: Available
+    - fieldsEqual:
+        fieldA: .status.updatedReplicas
+        fieldB: .status.replicas
+    selector:
+      kind:
+        group: apps
+        kind: Deployment
+  - probes:
+    - condition:
+        status: "True"
+        type: Complete
+    selector:
+      kind:
+        group: batch
+        kind: Job
+  config: {}
+  filter: {}
+  images: null
+  phases:
+  - name: namespaces
+  - name: publish
+  - name: rbac
+  - name: deploy
+  - name: other
+  scopes:
+  - Cluster
+test: {}

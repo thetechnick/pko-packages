@@ -1,0 +1,24 @@
+apiVersion: manifests.package-operator.run/v1alpha1
+kind: PackageManifest
+metadata:
+  creationTimestamp: null
+  name: espocrm
+spec:
+  phases:
+  - name: deploy
+  config:
+    openAPIV3Schema:
+      properties:
+        hostname:
+          type: string
+        clusterIssuer:
+          type: string
+      required:
+      - hostname
+      - clusterIssuer
+      type: object
+  filter: {}
+  images: null
+  scopes:
+  - Namespaced
+test: {}

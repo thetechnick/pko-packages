@@ -1,0 +1,89 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: espocrm-headless
+  labels:
+    app: espocrm
+  annotations:
+    package-operator.run/phase: deploy
+spec:
+  ports:
+  - name: http
+    port: 80
+    targetPort: http
+  selector:
+    app: espocrm
+  type: ClusterIP
+  clusterIP: None
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: espocrm
+  labels:
+    app: espocrm
+  annotations:
+    package-operator.run/phase: deploy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: espocrm
+  serviceName: espocrm-headless
+  template:
+    metadata:
+      labels:
+        app: espocrm
+    spec:
+      containers:
+      - name: espocrm
+        image: docker.io/espocrm/espocrm:8.3.6-apache
+        env:
+        - name: ESPOCRM_DATABASE_PLATFORM
+          value: Postgresql
+        - name: ESPOCRM_DATABASE_HOST
+          value: localhost
+        - name: ESPOCRM_DATABASE_USER
+          value: espocrm
+        - name: ESPOCRM_DATABASE_PASSWORD
+          value: espocrm
+        - name: ESPOCRM_ADMIN_USERNAME
+          value: admin
+        - name: ESPOCRM_ADMIN_PASSWORD
+          value: espocrmadmin
+        - name: ESPOCRM_SITE_URL
+          value: "https://{{ .config.hostname }}"
+        ports:
+        - name: http
+          containerPort: 80
+        volumeMounts:
+        - name: webroot
+          mountPath: /var/www/html
+      - name: espocrm-daemon
+        image: docker.io/espocrm/espocrm:8.3.6-apache
+        command: ["docker-daemon.sh"]
+        volumeMounts:
+        - name: webroot
+          mountPath: /var/www/html
+      - name: postgres
+        image: postgres:14
+        env:
+        - name: POSTGRES_USER
+          value: espocrm
+        - name: POSTGRES_PASSWORD
+          value: espocrm
+        - name: POSTGRES_DB
+          value: espocrm
+        volumeMounts:
+        - name: postgres-data
+          mountPath: /var/lib/postgresql/data
+          subPath: postgres
+      volumes:
+      - hostPath:
+          path: /mnt/k8s/apps/webroot-espocrm
+          type: Directory
+        name: webroot
+      - hostPath:
+          path: /mnt/k8s/apps/postgres-espocrm
+          type: Directory
+        name: postgres-data

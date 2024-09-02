@@ -1,0 +1,47 @@
+apiVersion: manifests.package-operator.run/v1alpha1
+kind: PackageManifest
+metadata:
+  creationTimestamp: null
+  name: cert-manager
+spec:
+  availabilityProbes:
+  - probes:
+    - condition:
+        status: "True"
+        type: Available
+    - fieldsEqual:
+        fieldA: .status.updatedReplicas
+        fieldB: .status.replicas
+    selector:
+      kind:
+        group: apps
+        kind: Deployment
+  - probes:
+    - condition:
+        status: "True"
+        type: Established
+    selector:
+      kind:
+        group: apiextensions.k8s.io
+        kind: CustomResourceDefinition
+  config: {}
+  filter: {}
+  images: null
+  phases:
+  - name: namespaces
+  - name: rbac
+  - name: crds
+  - name: deploy
+  - name: publish
+  scopes:
+  - Cluster
+test:
+  kubeconform:
+    kubernetesVersion: v1.30.2
+  template:
+  - context:
+      package:
+        image: registry.package-operator.run/static-image
+        metadata:
+          name: cert-manager
+    name: no-config
