@@ -60,7 +60,7 @@ spec:
         - name: webroot
           mountPath: /var/www/html
       - name: espocrm-daemon
-        image: docker.io/espocrm/espocrm:8.3.6-apache
+        image: docker.io/espocrm/espocrm:8.4.1-apache
         command: ["docker-daemon.sh"]
         volumeMounts:
         - name: webroot
