@@ -37,7 +37,7 @@ spec:
     spec:
       containers:
       - name: nextcloud
-        image: "{{.images.nextcloud}}"
+        image: "registry.package-operator.run/static-image"
         volumeMounts:
         - mountPath: /var/www/html
           name: webroot
@@ -70,7 +70,7 @@ spec:
           value: nextcloud
         - name: POSTGRES_PASSWORD
           value: nextcloud
-        image: "{{.images.nextcloud}}"
+        image: "registry.package-operator.run/static-image"
         name: cron
         volumeMounts:
         - mountPath: /var/www/html
@@ -78,7 +78,7 @@ spec:
         - mountPath: /var/www/html/data
           name: data
       - name: postgres
-        image: "{{.images.postgres}}"
+        image: "registry.package-operator.run/static-image"
         env:
         - name: POSTGRES_USER
           value: nextcloud
@@ -97,8 +97,7 @@ spec:
         - --appendonly no
         - --maxmemory 483183820800
         - --maxmemory-policy allkeys-lfu
-        image: "{{.images.redis}}"
-{{- if hasKey .config.storage "hostDir" }}
+        image: "registry.package-operator.run/static-image"
       volumes:
       - hostPath:
           path: /mnt/k8s/apps/nextcloud-data
@@ -112,31 +111,3 @@ spec:
           path: /mnt/k8s/apps/postgres-nextcloud
           type: Directory
         name: postgres-data
-{{- end}}
-{{- if hasKey .config.storage "pvc" }}
-  volumeClaimTemplates:
-  - metadata:
-      name: data
-    spec:
-      accessModes: [ "ReadWriteOnce" ]
-      storageClassName: {{.config.storage.pvc.storageClassName}}
-      resources:
-        requests:
-          storage: {{.config.storage.pvc.dataStorage}}
-  - metadata:
-      name: webroot
-    spec:
-      accessModes: [ "ReadWriteOnce" ]
-      storageClassName: {{.config.storage.pvc.storageClassName}}
-      resources:
-        requests:
-          storage: 5Gi
-  - metadata:
-      name: postgres-data
-    spec:
-      accessModes: [ "ReadWriteOnce" ]
-      storageClassName: {{.config.storage.pvc.storageClassName}}
-      resources:
-        requests:
-          storage: 5Gi
-{{- end}}

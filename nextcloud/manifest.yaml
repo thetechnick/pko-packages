@@ -13,12 +13,60 @@ spec:
           type: string
         clusterIssuer:
           type: string
+        storage:
+          type: object
+          default:
+            hostDir: {}
+          properties:
+            hostDir:
+              type: object
+            pvc:
+              type: object
+              properties:
+                storageClassName:
+                  type: string
+                dataStorage:
+                  type: string 
       required:
       - hostname
       - clusterIssuer
+      - storage
       type: object
   filter: {}
-  images: null
+  images:
+  - name: nextcloud
+    image: docker.io/nextcloud:30.0.4-apache
+  - name: postgres
+    image: docker.io/postgres:14
+  - name: redis
+    image: docker.io/redis:7.2-alpine
   scopes:
   - Namespaced
-test: {}
+test:
+  kubeconform:
+    kubernetesVersion: v1.28.2
+  template:
+  - name: hostdir
+    context:
+      config:
+        storage:
+          hostDir: {}
+        hostname: cloud.package-operator.run
+        clusterIssuer: letsencrypt-prod
+      package:
+        metadata:
+          name: test
+          namespace: test-ns
+  - name: pvc
+    context:
+      config:
+        storage:
+          pvc:
+            storageClassName: fast
+            dataStorage: 1T
+        hostname: cloud.package-operator.run
+        clusterIssuer: letsencrypt-prod
+      package:
+        metadata:
+          name: test
+          namespace: test-ns
