@@ -4,6 +4,7 @@ metadata:
   creationTimestamp: null
   name: nextcloud
 spec:
+  components: {}
   phases:
   - name: deploy
   config:

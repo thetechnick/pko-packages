@@ -1,0 +1,32 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: collabora
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    package-operator.run/phase: deploy
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+    nginx.ingress.kubernetes.io/upstream-hash-by: "$arg_WOPISrc"
+    nginx.ingress.kubernetes.io/server-snippet: |
+      location /cool/getMetrics { deny all; return 403; }
+      location /cool/adminws/ { deny all; return 403; }
+      location /browser/dist/admin/admin.html { deny all; return 403; }
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+      - cloud.package-operator.run
+      secretName: collabora-tls-secret
+  rules:
+  - host: "cloud.package-operator.run"
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: collabora
+            port:
+              number: 80

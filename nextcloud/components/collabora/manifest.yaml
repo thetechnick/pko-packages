@@ -1,0 +1,40 @@
+apiVersion: manifests.package-operator.run/v1alpha1
+kind: PackageManifest
+metadata:
+  creationTimestamp: null
+  name: collabora
+spec:
+  phases:
+  - name: deploy
+  config:
+    openAPIV3Schema:
+      properties:
+        hostname:
+          type: string
+        clusterIssuer:
+          type: string
+      required:
+      - hostname
+      - clusterIssuer
+      type: object
+  filter: {}
+  images:
+  - name: collabora
+    image: docker.io/collabora/code:24.04.11.1.1
+  scopes:
+  - Namespaced
+test:
+  kubeconform:
+    kubernetesVersion: v1.28.2
+  template:
+  - name: hostdir
+    context:
+      config:
+        storage:
+          hostDir: {}
+        hostname: cloud.package-operator.run
+        clusterIssuer: letsencrypt-prod
+      package:
+        metadata:
+          name: test
+          namespace: test-ns
