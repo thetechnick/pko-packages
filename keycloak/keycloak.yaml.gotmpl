@@ -1,9 +1,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: keycloak-headless
+  name: {{ .package.metadata.name }}-keycloak-headless
   labels:
-    app: keycloak
+    app.kubernetes.io/name: {{ .package.metadata.name }}
+    app.kubernetes.io/instance: keycloak
   annotations:
     package-operator.run/phase: deploy
 spec:
@@ -16,28 +17,50 @@ spec:
   type: ClusterIP
   clusterIP: None
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .package.metadata.name }}-keycloak
+  labels:
+    app.kubernetes.io/name: {{ .package.metadata.name }}
+    app.kubernetes.io/instance: keycloak
+  annotations:
+    package-operator.run/phase: deploy
+spec:
+  ports:
+  - name: https
+    port: 443
+    targetPort: https
+  selector:
+    app.kubernetes.io/name: {{ .package.metadata.name }}
+    app.kubernetes.io/instance: keycloak
+  type: ClusterIP
+---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: keycloak
+  name: {{ .package.metadata.name }}-keycloak
   labels:
-    app: keycloak
+    app.kubernetes.io/name: {{ .package.metadata.name }}
+    app.kubernetes.io/instance: keycloak
   annotations:
     package-operator.run/phase: deploy
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: keycloak
-  serviceName: keycloak-headless
+      app.kubernetes.io/name: {{ .package.metadata.name }}
+      app.kubernetes.io/instance: keycloak
+  serviceName: {{ .package.metadata.name }}-keycloak-headless
   template:
     metadata:
       labels:
-        app: keycloak
+        app.kubernetes.io/name: {{ .package.metadata.name }}
+        app.kubernetes.io/instance: keycloak
     spec:
       containers:
       - name: keycloak
-        image: quay.io/keycloak/keycloak:25.0.2
+        image: quay.io/keycloak/keycloak:26.2.5
         args: ["start"]
         volumeMounts:
         - name: certs
@@ -55,11 +78,17 @@ spec:
         - name: KC_DB
           value: postgres
         - name: KC_DB_URL
-          value: "jdbc:postgresql://localhost/keycloak"
+          value: "jdbc:postgresql://{{ .config.databaseHost }}/keycloak"
         - name: KC_DB_USERNAME
-          value: "keycloak"
+          valueFrom:
+            secretKeyRef:
+              name: {{ .config.databaseSecretName }}
+              key: username
         - name: KC_DB_PASSWORD
-          value: "keycloak"
+          valueFrom:
+            secretKeyRef:
+              name: {{ .config.databaseSecretName }}
+              key: password
         - name: KC_HTTPS_CERTIFICATE_FILE
           value: "/etc/certs/tls.crt"
         - name: KC_HTTPS_CERTIFICATE_KEY_FILE
@@ -74,24 +103,7 @@ spec:
             port: 8443
           initialDelaySeconds: 20
           periodSeconds: 5
-      - name: postgres
-        image: postgres:14
-        env:
-        - name: POSTGRES_USER
-          value: keycloak
-        - name: POSTGRES_PASSWORD
-          value: keycloak
-        - name: POSTGRES_DB
-          value: keycloak
-        volumeMounts:
-        - name: postgres-data
-          mountPath: /var/lib/postgresql/data
-          subPath: postgres
       volumes:
       - name: certs
         secret:
           secretName: auth-tls-secret
-      - hostPath:
-          path: /mnt/k8s/apps/postgres-keycloak
-          type: Directory
-        name: postgres-data

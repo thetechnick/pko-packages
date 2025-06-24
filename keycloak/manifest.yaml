@@ -25,9 +25,15 @@ spec:
           type: string
         clusterIssuer:
           type: string
+        databaseSecretName:
+          type: string
+        databaseHost:
+          type: string
       required:
       - hostname
       - clusterIssuer
+      - databaseSecretName
+      - databaseHost
       type: object
   filter: {}
   images: null
@@ -45,4 +51,6 @@ test:
       config:
         hostname: sso.thetechnick.ninja
         clusterIssuer: le-prod
+        databaseSecretName: test-secret
+        databaseHost: test.db.example.com
     name: no-config

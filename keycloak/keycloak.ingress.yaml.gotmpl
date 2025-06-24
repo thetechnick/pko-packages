@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: keycloak
+  name: {{ .package.metadata.name }}-keycloak
   annotations:
     nginx.ingress.kubernetes.io/backend-protocol: "https"
     nginx.ingress.kubernetes.io/proxy-buffer-size: "128k"
@@ -17,10 +17,10 @@ spec:
   - host: "{{ .config.hostname }}"
     http:
       paths:
-      - pathType: Prefix
+      - pathType: ImplementationSpecific
         path: "/"
         backend:
           service:
-            name: keycloak
+            name: {{ .package.metadata.name }}-keycloak
             port:
               number: 443
