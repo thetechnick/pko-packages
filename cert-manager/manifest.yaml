@@ -35,5 +35,4 @@ spec:
   - name: publish
   scopes:
   - Cluster
-  - Namespaced
 test: {}
