@@ -52,3 +52,10 @@ test:
         metadata:
           name: test
       environment: {}
+  - name: cluster-scope-no-config
+    context:
+      config: {}
+      package:
+        metadata:
+          name: test
+      environment: {}

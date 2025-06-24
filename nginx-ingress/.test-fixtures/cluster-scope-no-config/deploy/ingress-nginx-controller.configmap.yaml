@@ -12,6 +12,3 @@ metadata:
     app.kubernetes.io/version: 1.12.3
   name: ingress-nginx-controller
   namespace: ingress-nginx
-{{- if hasKey .config "config" }}
-data: {{ .config.config | toJson }}
-{{- end}}
