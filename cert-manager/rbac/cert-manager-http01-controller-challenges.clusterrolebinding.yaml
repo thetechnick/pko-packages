@@ -5,15 +5,15 @@ metadata:
     package-operator.run/phase: rbac
   labels:
     app: cert-manager
-    app.kubernetes.io/component: cert-manager
+    app.kubernetes.io/component: controller
     app.kubernetes.io/instance: cert-manager
     app.kubernetes.io/name: cert-manager
-    app.kubernetes.io/version: v1.15.3
-  name: cert-manager-controller-approve:cert-manager-io
+    app.kubernetes.io/version: v1.18.0
+  name: cert-manager-http01-controller-challenges
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: cert-manager-controller-approve:cert-manager-io
+  name: cert-manager-http01-controller-challenges
 subjects:
 - kind: ServiceAccount
   name: cert-manager

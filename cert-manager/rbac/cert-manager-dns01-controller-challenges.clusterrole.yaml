@@ -8,21 +8,30 @@ metadata:
     app.kubernetes.io/component: controller
     app.kubernetes.io/instance: cert-manager
     app.kubernetes.io/name: cert-manager
-    app.kubernetes.io/version: v1.15.3
-  name: cert-manager-controller-issuers
+    app.kubernetes.io/version: v1.18.0
+  name: cert-manager-dns01-controller-challenges
 rules:
 - apiGroups:
-  - cert-manager.io
+  - acme.cert-manager.io
   resources:
-  - issuers
-  - issuers/status
+  - challenges
+  - challenges/status
   verbs:
   - update
   - patch
 - apiGroups:
+  - acme.cert-manager.io
+  resources:
+  - challenges
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
   - cert-manager.io
   resources:
   - issuers
+  - clusterissuers
   verbs:
   - get
   - list
@@ -35,9 +44,6 @@ rules:
   - get
   - list
   - watch
-  - create
-  - update
-  - delete
 - apiGroups:
   - ""
   resources:
@@ -45,3 +51,17 @@ rules:
   verbs:
   - create
   - patch
+- apiGroups:
+  - acme.cert-manager.io
+  resources:
+  - challenges/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+  - list
+  - watch

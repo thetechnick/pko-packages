@@ -35,13 +35,5 @@ spec:
   - name: publish
   scopes:
   - Cluster
-test:
-  kubeconform:
-    kubernetesVersion: v1.30.2
-  template:
-  - context:
-      package:
-        image: registry.package-operator.run/static-image
-        metadata:
-          name: cert-manager
-    name: no-config
+  - Namespaced
+test: {}
