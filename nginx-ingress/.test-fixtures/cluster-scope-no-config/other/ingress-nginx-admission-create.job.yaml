@@ -2,14 +2,14 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   annotations:
-    package-operator.run/phase: deploy
+    package-operator.run/phase: other
   labels:
     app.kubernetes.io/component: admission-webhook
     app.kubernetes.io/instance: ingress-nginx
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/part-of: ingress-nginx
     app.kubernetes.io/version: 1.12.3
-  name: ingress-nginx-admission-patch
+  name: ingress-nginx-admission-create
   namespace: ingress-nginx
 spec:
   template:
@@ -20,16 +20,14 @@ spec:
         app.kubernetes.io/name: ingress-nginx
         app.kubernetes.io/part-of: ingress-nginx
         app.kubernetes.io/version: 1.12.3
-      name: ingress-nginx-admission-patch
+      name: ingress-nginx-admission-create
     spec:
       containers:
       - args:
-        - patch
-        - --webhook-name=ingress-nginx-admission
+        - create
+        - --host=ingress-nginx-controller-admission,ingress-nginx-controller-admission.$(POD_NAMESPACE).svc
         - --namespace=$(POD_NAMESPACE)
-        - --patch-mutating=false
         - --secret-name=ingress-nginx-admission
-        - --patch-failure-policy=Fail
         env:
         - name: POD_NAMESPACE
           valueFrom:
@@ -37,7 +35,7 @@ spec:
               fieldPath: metadata.namespace
         image: registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.5.4@sha256:7a38cf0f8480775baaee71ab519c7465fd1dfeac66c421f28f087786e631456e
         imagePullPolicy: IfNotPresent
-        name: patch
+        name: create
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -53,4 +51,3 @@ spec:
         kubernetes.io/os: linux
       restartPolicy: OnFailure
       serviceAccountName: ingress-nginx-admission
-  ttlSecondsAfterFinished: 0
