@@ -24,15 +24,31 @@ spec:
       kind:
         group: batch
         kind: Job
-  config: {}
+  config:
+    openAPIV3Schema:
+      properties:
+        config:
+          type: object
+          x-kubernetes-preserve-unknown-fields: true
+      type: object
   filter: {}
   images: null
   phases:
   - name: namespaces
-  - name: publish
   - name: rbac
   - name: deploy
+  - name: publish
   - name: other
   scopes:
   - Cluster
-test: {}
+test:
+  template:
+  - name: cluster-scope
+    context:
+      config:
+        config:
+          allow-snippet-annotations: "false"
+      package:
+        metadata:
+          name: test
+      environment: {}
