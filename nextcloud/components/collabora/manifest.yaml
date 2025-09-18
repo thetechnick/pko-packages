@@ -13,6 +13,9 @@ spec:
           type: string
         clusterIssuer:
           type: string
+        extra_params:
+          default: ""
+          type: string
       required:
       - hostname
       - clusterIssuer
@@ -20,7 +23,7 @@ spec:
   filter: {}
   images:
   - name: collabora
-    image: docker.io/collabora/code:24.04.11.1.1
+    image: docker.io/collabora/code:25.04.5.2.1
   scopes:
   - Namespaced
 test:
@@ -34,6 +37,7 @@ test:
           hostDir: {}
         hostname: cloud.package-operator.run
         clusterIssuer: letsencrypt-prod
+        extra_params: ' --o:remote_font_config.url=https://cloud.package-operator.run/apps/richdocuments/settings/fonts.json'
       package:
         metadata:
           name: test

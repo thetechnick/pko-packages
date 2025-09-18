@@ -14,6 +14,13 @@ spec:
           type: string
         clusterIssuer:
           type: string
+        databaseHost:
+          type: string
+        databaseName:
+          type: string
+          default: nextcloud
+        databaseSecretName:
+          type: string
         storage:
           type: object
           default:
@@ -32,13 +39,13 @@ spec:
       - hostname
       - clusterIssuer
       - storage
+      - databaseSecretName
+      - databaseHost
       type: object
   filter: {}
   images:
   - name: nextcloud
-    image: docker.io/nextcloud:30.0.4-apache
-  - name: postgres
-    image: docker.io/postgres:14
+    image: docker.io/nextcloud:31.0.9-apache
   - name: redis
     image: docker.io/redis:7.2-alpine
   scopes:
@@ -54,6 +61,8 @@ test:
           hostDir: {}
         hostname: cloud.package-operator.run
         clusterIssuer: letsencrypt-prod
+        databaseHost: test.database.example.com
+        databaseSecretName: test
       package:
         metadata:
           name: test
@@ -67,6 +76,8 @@ test:
             dataStorage: 1T
         hostname: cloud.package-operator.run
         clusterIssuer: letsencrypt-prod
+        databaseHost: test.database.example.com
+        databaseSecretName: test
       package:
         metadata:
           name: test

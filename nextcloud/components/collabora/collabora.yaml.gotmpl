@@ -40,7 +40,7 @@ spec:
         image: "{{.images.collabora}}"
         env:
         - name: extra_params
-          value: "--o:ssl.enable=false --o:ssl.termination=true --o:net.proto=IPv4 --o:loggin.level=debug"
+          value: "--o:ssl.enable=false --o:ssl.termination=true --o:net.proto=IPv4 --o:loggin.level=debug {{- .config.extra_params}}"
         volumeMounts:
         - name: tmp
           mountPath: /tmp

@@ -1,9 +1,9 @@
 apiVersion: manifests.package-operator.run/v1alpha1
 kind: PackageManifestLock
 metadata:
-  creationTimestamp: "2025-01-08T13:18:34Z"
+  creationTimestamp: "2025-09-18T12:38:50Z"
 spec:
   images:
-  - digest: sha256:d5b2d6e54f074d8d936a21dccd7bff258446443733e1fa87a4171e51ecd974dc
-    image: docker.io/collabora/code:24.04.11.1.1
+  - digest: sha256:74031c1ecf6823dc9abd1a97142fef01797bdd7dc93aef0b8b09145ed2273cc3
+    image: docker.io/collabora/code:25.04.5.2.1
     name: collabora

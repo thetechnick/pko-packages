@@ -47,13 +47,19 @@ spec:
         - name: REDIS_HOST
           value: localhost
         - name: POSTGRES_HOST
-          value: localhost
+          value: {{ .config.databaseHost }}
         - name: POSTGRES_DB
-          value: nextcloud
+          value: {{ .config.databaseName }}
         - name: POSTGRES_USER
-          value: nextcloud
+          valueFrom:
+            secretKeyRef:
+              name: {{ .config.databaseSecretName }}
+              key: username
         - name: POSTGRES_PASSWORD
-          value: nextcloud
+          valueFrom:
+            secretKeyRef:
+              name: {{ .config.databaseSecretName }}
+              key: password
         ports:
         - name: http
           containerPort: 80
@@ -63,13 +69,19 @@ spec:
         - name: REDIS_HOST
           value: localhost
         - name: POSTGRES_HOST
-          value: localhost
+          value: {{ .config.databaseHost }}
         - name: POSTGRES_DB
-          value: nextcloud
+          value: {{ .config.databaseName }}
         - name: POSTGRES_USER
-          value: nextcloud
+          valueFrom:
+            secretKeyRef:
+              name: {{ .config.databaseSecretName }}
+              key: username
         - name: POSTGRES_PASSWORD
-          value: nextcloud
+          valueFrom:
+            secretKeyRef:
+              name: {{ .config.databaseSecretName }}
+              key: password
         image: "{{.images.nextcloud}}"
         name: cron
         volumeMounts:
@@ -77,19 +89,6 @@ spec:
           name: webroot
         - mountPath: /var/www/html/data
           name: data
-      - name: postgres
-        image: "{{.images.postgres}}"
-        env:
-        - name: POSTGRES_USER
-          value: nextcloud
-        - name: POSTGRES_PASSWORD
-          value: nextcloud
-        - name: POSTGRES_DB
-          value: nextcloud
-        volumeMounts:
-        - name: postgres-data
-          mountPath: /var/lib/postgresql/data
-          subPath: postgres
       - name: redis
         args:
         - redis-server
@@ -108,10 +107,6 @@ spec:
           path: /mnt/k8s/apps/nextcloud-webroot
           type: Directory
         name: webroot
-      - hostPath:
-          path: /mnt/k8s/apps/postgres-nextcloud
-          type: Directory
-        name: postgres-data
 {{- end}}
 {{- if hasKey .config.storage "pvc" }}
   volumeClaimTemplates:
@@ -125,14 +120,6 @@ spec:
           storage: {{.config.storage.pvc.dataStorage}}
   - metadata:
       name: webroot
-    spec:
-      accessModes: [ "ReadWriteOnce" ]
-      storageClassName: {{.config.storage.pvc.storageClassName}}
-      resources:
-        requests:
-          storage: 5Gi
-  - metadata:
-      name: postgres-data
     spec:
       accessModes: [ "ReadWriteOnce" ]
       storageClassName: {{.config.storage.pvc.storageClassName}}

@@ -47,13 +47,19 @@ spec:
         - name: REDIS_HOST
           value: localhost
         - name: POSTGRES_HOST
-          value: localhost
+          value: test.database.example.com
         - name: POSTGRES_DB
           value: nextcloud
         - name: POSTGRES_USER
-          value: nextcloud
+          valueFrom:
+            secretKeyRef:
+              name: test
+              key: username
         - name: POSTGRES_PASSWORD
-          value: nextcloud
+          valueFrom:
+            secretKeyRef:
+              name: test
+              key: password
         ports:
         - name: http
           containerPort: 80
@@ -63,13 +69,19 @@ spec:
         - name: REDIS_HOST
           value: localhost
         - name: POSTGRES_HOST
-          value: localhost
+          value: test.database.example.com
         - name: POSTGRES_DB
           value: nextcloud
         - name: POSTGRES_USER
-          value: nextcloud
+          valueFrom:
+            secretKeyRef:
+              name: test
+              key: username
         - name: POSTGRES_PASSWORD
-          value: nextcloud
+          valueFrom:
+            secretKeyRef:
+              name: test
+              key: password
         image: "registry.package-operator.run/static-image"
         name: cron
         volumeMounts:
@@ -77,19 +89,6 @@ spec:
           name: webroot
         - mountPath: /var/www/html/data
           name: data
-      - name: postgres
-        image: "registry.package-operator.run/static-image"
-        env:
-        - name: POSTGRES_USER
-          value: nextcloud
-        - name: POSTGRES_PASSWORD
-          value: nextcloud
-        - name: POSTGRES_DB
-          value: nextcloud
-        volumeMounts:
-        - name: postgres-data
-          mountPath: /var/lib/postgresql/data
-          subPath: postgres
       - name: redis
         args:
         - redis-server
@@ -107,7 +106,3 @@ spec:
           path: /mnt/k8s/apps/nextcloud-webroot
           type: Directory
         name: webroot
-      - hostPath:
-          path: /mnt/k8s/apps/postgres-nextcloud
-          type: Directory
-        name: postgres-data

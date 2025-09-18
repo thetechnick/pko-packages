@@ -1,15 +1,12 @@
 apiVersion: manifests.package-operator.run/v1alpha1
 kind: PackageManifestLock
 metadata:
-  creationTimestamp: "2025-01-08T10:13:02Z"
+  creationTimestamp: "2025-09-18T12:56:07Z"
 spec:
   images:
-  - digest: sha256:6bba95a59b3bcc95b81c93b8fc5299ad2ea8d83692e6cf289650c132f7151209
-    image: docker.io/nextcloud:30.0.4-apache
+  - digest: sha256:11f158050216614d585886600445e0a1b75ee224d6a6dddc5eba996cc9499fa6
+    image: docker.io/nextcloud:31.0.9-apache
     name: nextcloud
-  - digest: sha256:922d38d4ca73ba5bfa8140c50b0d1f45636ca7b4c20d90506c49e2be2d7911f5
-    image: docker.io/postgres:14
-    name: postgres
-  - digest: sha256:b62408cdb427ef06db357606637a1a79adf982ccab36743e6bb9ca242eda655f
+  - digest: sha256:395ccd7ee4db0867de0d0410f4712a9e0331cff9fdbd864f71ec0f7982d3ffe6
     image: docker.io/redis:7.2-alpine
     name: redis
